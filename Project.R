@@ -26,6 +26,7 @@ library(visNetwork)
 library(igraph)
 library(kableExtra)
 library("RColorBrewer")
+
 install.packages("devtools")
 devtools::install_github("ropensci/plotly")
 
@@ -133,7 +134,7 @@ tmp %>%
   ggplot(aes(x=reorder(product_name, -pct), y=pct))+
   geom_bar(stat = "identity", fill="pink")+
   theme(axis.text.x = element_text(angle=90, hjust=1), axis.title.x = element_blank())+coord_cartesian(ylim = c(0.4,0.7))
-        
+
 #Association between time of last order and probability of reorder
 order_products %>%
   left_join(orders, by="order_id") %>%
@@ -268,3 +269,28 @@ plotly_arules(rules)
 sel <- plot(rules, measure = c("support", "lift"),
             shading = "confidence",
             interactive = TRUE)
+
+#Network graph Visualization
+#It represents product in shopping basket and each rule from ==> to is an edge of the graph
+#It tells us that if a customer buys Bag of Organic banana he is likely to buy organic lemon, organic apple etc.
+
+subrules2 <- head(sort(rules, by = "confidence"), 20)
+ig <- plot(subrules2, method="graph", control=list(type="items"))
+ig_df <- get.data.frame(ig, what = "both")
+
+subrules2 <- head(sort(rules, by="confidence"), 20)
+ig <- plot(subrules2, method = "graph", control=list(type="items"))
+
+ig_df <- toVisNetworkData(ig, idToLabel = FALSE)
+
+visNetwork(ig_df$nodes, ig_df$edges) %>%
+  visNodes(size = 10) %>%
+  visLegend() %>%
+  visEdges(smooth = FALSE) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
+  visInteraction(navigationButtons = TRUE) %>%
+  visEdges(arrows = 'from') %>%
+  visPhysics(
+    solver = "barnesHut",
+    maxVelocity = 35,
+    forceAtlas2Based = list(gravitationalConstant = -6000))
