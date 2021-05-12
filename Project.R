@@ -232,6 +232,7 @@ order_baskets = order_products_train %>%
 #create transaction data
 transactions <- as(order_baskets$basket,"transactions")
 inspect(transactions[1])         #Select no. serial no. of transaction
+inspect(transactions[2])
 #Output shows that one transaction contains list of products
 
 #Implementing Apriori algorithm
@@ -247,7 +248,7 @@ rules <- rules[!is.redundant(rules)]
 rules_dt <- data.table(lhs = labels(lhs(rules)),
                        rhs = labels(rhs(rules)),
                        quality(rules))[order(-lift),]
-head(rules_dt, 5)
+head(rules_dt, 27)
 
 #Item Frequency Plot, it tells us how many times an item has occurred in our dataset as compared to others.
 
@@ -278,7 +279,7 @@ subrules2 <- head(sort(rules, by = "confidence"), 20)
 ig <- plot(subrules2, method="graph", control=list(type="items"))
 ig_df <- get.data.frame(ig, what = "both")
 
-subrules2 <- head(sort(rules, by="confidence"), 20)
+subrules2 <- head(sort(rules, by="confidence"), 27)
 ig <- plot(subrules2, method = "graph", control=list(type="items"))
 
 ig_df <- toVisNetworkData(ig, idToLabel = FALSE)
